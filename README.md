@@ -10,4 +10,4 @@ To run the unit test selenium and the firefox plugin are needed.
 Before running the test you need to set up 3 arguments:
 - username
 - password
-- uchiwa ip
+- grafana ip
