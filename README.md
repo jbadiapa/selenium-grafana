@@ -7,7 +7,5 @@ https://gist.github.com/jbadiapa/921c7719c59bfd89cf862fd6bef07d6d
 
 To run the unit test selenium and the firefox plugin are needed.
 
-Before running the test you need to set up 3 arguments:
-- username
-- password
-- grafana ip
+python grafana_test.py --ip 192.168.33.51 --username admin --password admin
+--port 443 --protocol https

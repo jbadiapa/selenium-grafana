@@ -1,19 +1,25 @@
 import unittest
 from selenium import webdriver
-# from selenium.webdriver.common.by import By
 from time import sleep
+import sys
 
 
 class GrafanaSelenium(unittest.TestCase):
+
+    USERNAME = 'admin'
+    PASSWORD = 'admin'
+    PROTOCOL = 'https'
+    PORT = 443
+    IP = 'localhost'
 
     def setUp(self):
         profile = webdriver.FirefoxProfile()
         profile.set_preference('network.http.phishy-userpass-length', 255)
         self.driver = webdriver.Firefox(firefox_profile=profile)
-        self.username = 'admin'
-        self.password = 'admin'
-        self.ip = '192.168.33.51'
-        self.url = 'https://{}/grafana/'.format(self.ip)
+        self.url = '{protocol}://{ip}:{port}/grafana/'.format(
+            protocol=GrafanaSelenium.PROTOCOL,
+            ip=GrafanaSelenium.IP,
+            port=GrafanaSelenium.PORT)
 
     def _url_load(self, url):
         driver = self.driver
@@ -36,15 +42,41 @@ class GrafanaSelenium(unittest.TestCase):
         passw = driver.find_element_by_id('inputPassword')
         button = driver.find_element_by_class_name('btn-inverse')
         # Insert the login data
-        user.send_keys(self.username)
-        passw.send_keys(self.password)
+        user.send_keys(GrafanaSelenium.USERNAME)
+        passw.send_keys(GrafanaSelenium.PASSWORD)
         # click the login button
         button.click()
-        sleep(1)
+        sleep(2)
         assert 'Grafana - Home' in driver.title
 
     def tearDown(self):
         self.driver.close()
 
+
+def parse_argument():
+    arguments = {'ip': 'localhost',
+                 'protocol': 'https',
+                 'username': 'admin',
+                 'password': 'admin',
+                 'port': '443'}
+
+    for x in arguments.keys():
+        try:
+            elem = '--{}'.format(x)
+            pos = sys.argv.index(elem)
+            if (pos):
+                sys.argv.pop(pos)
+                arguments[x] = sys.argv.pop(pos)
+        except ValueError:
+            pass
+
+    GrafanaSelenium.USERNAME = arguments['username']
+    GrafanaSelenium.PASSWORD = arguments['password']
+    GrafanaSelenium.IP = arguments['ip']
+    GrafanaSelenium.PROTOCOL = arguments['protocol']
+    GrafanaSelenium.PORT = arguments['port']
+
+
 if __name__ == "__main__":
+    parse_argument()
     unittest.main()
