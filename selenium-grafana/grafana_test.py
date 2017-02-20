@@ -54,27 +54,23 @@ class GrafanaSelenium(unittest.TestCase):
 
 
 def parse_argument():
-    arguments = {'ip': 'localhost',
-                 'protocol': 'https',
-                 'username': 'admin',
-                 'password': 'admin',
-                 'port': '443'}
+    arguments = {'--ip': 'localhost',
+                 '--protocol': 'https',
+                 '--username': 'admin',
+                 '--password': 'admin',
+                 '--port': '443'}
+    iterations = list(sys.argv)
+    for arg in iterations:
+        if arg in arguments.keys():
+            pos = sys.argv.index(arg)
+            sys.argv.pop(pos)
+            arguments[arg] = sys.argv.pop(pos)
 
-    for x in arguments.keys():
-        try:
-            elem = '--{}'.format(x)
-            pos = sys.argv.index(elem)
-            if (pos):
-                sys.argv.pop(pos)
-                arguments[x] = sys.argv.pop(pos)
-        except ValueError:
-            pass
-
-    GrafanaSelenium.USERNAME = arguments['username']
-    GrafanaSelenium.PASSWORD = arguments['password']
-    GrafanaSelenium.IP = arguments['ip']
-    GrafanaSelenium.PROTOCOL = arguments['protocol']
-    GrafanaSelenium.PORT = arguments['port']
+    GrafanaSelenium.USERNAME = arguments['--username']
+    GrafanaSelenium.PASSWORD = arguments['--password']
+    GrafanaSelenium.IP = arguments['--ip']
+    GrafanaSelenium.PROTOCOL = arguments['--protocol']
+    GrafanaSelenium.PORT = arguments['--port']
 
 
 if __name__ == "__main__":
