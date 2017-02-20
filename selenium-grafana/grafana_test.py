@@ -1,5 +1,6 @@
 import unittest
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from time import sleep
 import sys
 
@@ -13,9 +14,10 @@ class GrafanaSelenium(unittest.TestCase):
     IP = 'localhost'
 
     def setUp(self):
-        profile = webdriver.FirefoxProfile()
-        profile.set_preference('network.http.phishy-userpass-length', 255)
-        self.driver = webdriver.Firefox(firefox_profile=profile)
+        caps = DesiredCapabilities.CHROME.copy()
+        caps['acceptInsecureCerts'] = True
+        caps['level'] = 'trace'
+        self.driver = webdriver.Chrome(desired_capabilities=caps)
         self.url = '{protocol}://{ip}:{port}/grafana/'.format(
             protocol=GrafanaSelenium.PROTOCOL,
             ip=GrafanaSelenium.IP,
