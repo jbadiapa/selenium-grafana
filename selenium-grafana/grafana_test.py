@@ -1,33 +1,17 @@
+from browser import Browser
 import unittest
-from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from time import sleep
-import sys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class GrafanaSelenium(unittest.TestCase):
 
-    USERNAME = 'admin'
-    PASSWORD = 'admin'
-    PROTOCOL = 'https'
-    PORT = 443
-    IP = 'localhost'
-
     def setUp(self):
-        caps = DesiredCapabilities.CHROME.copy()
-        caps['acceptInsecureCerts'] = True
-        caps['level'] = 'trace'
-        self.driver = webdriver.Chrome(desired_capabilities=caps)
-        self.url = '{protocol}://{ip}:{port}/grafana/'.format(
-            protocol=GrafanaSelenium.PROTOCOL,
-            ip=GrafanaSelenium.IP,
-            port=GrafanaSelenium.PORT)
+        browser.start()
 
     def _url_load(self, url):
-        driver = self.driver
-        driver.get(url)
-        sleep(2)
-        return driver
+        browser.load_page_site(url)
+        return browser.driver
 
     def _url_test(self, url, text):
         driver = self._url_load(url)
@@ -35,46 +19,34 @@ class GrafanaSelenium(unittest.TestCase):
         return driver
 
     def test_grafana_login_page(self):
-        return self._url_test(self.url, 'Grafana')
+        return self._url_test('', 'Grafana')
 
     def test_grafana_login(self):
-        driver = self.test_grafana_login_page()
+        self.test_grafana_login_page()
         # Find needed elements
-        user = driver.find_element_by_name('username')
-        passw = driver.find_element_by_id('inputPassword')
-        button = driver.find_element_by_class_name('btn-inverse')
+        user = browser.wait_for_obj(EC.presence_of_element_located(
+            (By.NAME, 'username')
+        ))
+
+        passw = browser.wait_for_obj(EC.presence_of_element_located(
+            (By.ID, 'inputPassword')
+        ))
+        button = browser.wait_for_obj(EC.presence_of_element_located(
+            (By.CLASS_NAME, 'btn-inverse')
+        ))
         # Insert the login data
-        user.send_keys(GrafanaSelenium.USERNAME)
-        passw.send_keys(GrafanaSelenium.PASSWORD)
+        user.send_keys(browser.username)
+        passw.send_keys(browser.password)
         # click the login button
         button.click()
-        sleep(2)
-        assert 'Grafana - Home' in driver.title
+        browser.wait_for_obj(EC.title_is('Grafana - Home'))
 
     def tearDown(self):
-        self.driver.close()
-
-
-def parse_argument():
-    arguments = {'--ip': 'localhost',
-                 '--protocol': 'https',
-                 '--username': 'admin',
-                 '--password': 'admin',
-                 '--port': '443'}
-    iterations = list(sys.argv)
-    for arg in iterations:
-        if arg in arguments.keys():
-            pos = sys.argv.index(arg)
-            sys.argv.pop(pos)
-            arguments[arg] = sys.argv.pop(pos)
-
-    GrafanaSelenium.USERNAME = arguments['--username']
-    GrafanaSelenium.PASSWORD = arguments['--password']
-    GrafanaSelenium.IP = arguments['--ip']
-    GrafanaSelenium.PROTOCOL = arguments['--protocol']
-    GrafanaSelenium.PORT = arguments['--port']
+        browser.end()
 
 
 if __name__ == "__main__":
-    parse_argument()
+    browser = Browser(screenshot_on_error=True)
+    browser.parse_arguments()
+    browser.set_url('grafana/')
     unittest.main()
